@@ -83,6 +83,11 @@ _start_cont:
 	pop		%ax
 	pop		%ax
 
+# set video to vga mode 13
+	mov 	$0x00, %ah  # set video mode
+	mov 	$0x13, %al  # video mode 13h
+	int 	$0x10       # bios interrupt
+
 # get disk info
 	mov		$8, %ah			# bios function to get CHS
 	mov		boot_disk, %dl	# disk number from bios

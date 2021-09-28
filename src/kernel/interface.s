@@ -18,7 +18,6 @@ along with gamelib-x64. If not, see <http://www.gnu.org/licenses/>.
 */
 
 .global setTimer
-.global putChar
 .global readKeyCode
 
 .section .kernel
@@ -45,41 +44,6 @@ setTimer:
 	xchgb	%al, %ah
 	outb	%al, $0x40
 
-	movq	%rbp, %rsp
-	popq	%rbp
-	ret
-
-# void putChar(int8 x, int8 y, int8 char, int8 color)
-#
-# Writes a character to the screen at coordinates (x, y). The resolution of
-# the screen is 80 by 25 characters. For more information, look up "VGA text mode".
-putChar:
-	pushq	%rbp
-	movq	%rsp, %rbp
-
-	# The address to write to is 0xB8000 + 2 * (80 * y + x)
-	andq	$0xFF, %rdi
-	andq	$0xFF, %rsi
-	shlq	$4, %rsi		# RSI = 16 * y
-	movq	%rsi, %rax		# RAX = 16 * y
-	shlq	$2, %rsi		# RSI = 64 * y
-	addq	%rsi, %rax		# RAX = 80 * y
-	addq	%rdi, %rax
-
-	# Ensure the index on the screen is within bounds
-	cmpq	$2000, %rax
-	jae		1f
-
-	movq	$0xB8000, %rdi
-	shlq	$1, %rax
-	addq	%rax, %rdi		# RDI now holds the address at which the 
-
-	# Write the character
-	movb	%dl, %al
-	movb	%cl, %ah
-	movw	%ax, (%rdi)
-
-1:
 	movq	%rbp, %rsp
 	popq	%rbp
 	ret

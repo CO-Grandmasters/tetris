@@ -27,11 +27,15 @@ To test your code, repeat steps 3 and 4  to compile and run your game.
 API
 ===========
 
-gamelib-x64 provides a restricted set of functions to its users to handle common IO operations. In your game you will be able to use the following functions (more information can be found in the `src/kernel/interface.s` file):
+gamelib-x64 provides a restricted set of functions to its users to handle common IO operations. In your game you will be able to use the following functions (more information can be found in the `src/kernel/interface.s` and `src/kernel/vga.s` files):
 
  -  `void setTimer(int16 reloadValue)`: Changes the interrupt rate of the timer, and thus the frequency of the game loop.
- -   `void putChar(int8 x, int8 y, int8 char, int8 color)`: Prints a single character to the screen with a specified color at a specified location.
  -  `int8 readKeyCode()`: Reads and returns a single byte from the keyboard buffer.
+ -  `void setPallette(int8 colorNr, int32 color)`: Modifies the VGA colour pallette.
+ -  `void clrScreen(int32 color)`: Clears the screen.
+ -  `void putDot(int8 x, int8 y, int32 color)`: Sets the pixel at a location to a colour.
+ -  `void putLine(int8 x0, int8 y0, int8 x1, int8 y1, int32 color)`: Draws a line.
+ -  `void putBitmap(int64* addr, int8 x, int8 y)`: Draws a bitmap from memory at position.
 
 In addition, your game should provide the following functions to hook into the gamelib-x64 framework:
 

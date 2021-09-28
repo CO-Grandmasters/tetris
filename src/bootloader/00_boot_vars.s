@@ -24,7 +24,7 @@ bootaddr = 0x7C00
 bootaddr2 = 0x7E0		# times 16
 kernel_addr = 0x1000	# times 16
 
-video_mem_start = 0xB8000
+video_mem_start = 0xA0000
 
 PML4		= 0x100000		# paging tables; the one and only master
 PDP			= 0x101000		# paging tables; the one and only PDP
