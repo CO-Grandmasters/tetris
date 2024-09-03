@@ -268,7 +268,7 @@ putLineLow:
 	# Check whether y increases or decreases
 	cmp 	$0, %rbx
 	jg 1f
-		mov 	$-1, (%rsp)		# if dy < 0
+		movq 	$-1, (%rsp)		# if dy < 0
 		neg 	%rbx			# also flip dy
 		jmp 2f
 1:	movq	 $1, (%rsp)		# if dy > 0
@@ -343,10 +343,10 @@ putLineHigh:
 	# Check whether x increases or decreases
 	cmp 	$0, %rbx
 	jg 1f
-		mov 	$-1, (%rsp)		# if dx < 0
+		movq 	$-1, (%rsp)		# if dx < 0
 		neg 	%rbx			# also flip dx
 		jmp 2f
-1:	mov 	 $1, (%rsp)		# if dx > 0
+1:	movq 	 $1, (%rsp)		# if dx > 0
 
 2:	mov 	%r15, %rdi 		# RDI = y1
 	sub 	%r14, %rdi 		# RDI = y1 - y0 (dy)
@@ -429,7 +429,7 @@ putBitmap:
 		mov 	$0, %rsi 	# RSI = iterator for width loop
 	3:	cmp 	%rsi, %r12
 		jle	4f
-			cmp 	$0, (%r14)	# if pixel 0 then dont draw
+			cmpq	$0, (%r14)	# if pixel 0 then dont draw
 			je 		5f
 				mov 	(%r14), %al
 				mov 	%al, (%r15)	# set pixel

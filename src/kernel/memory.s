@@ -430,7 +430,7 @@ identityMapMemory:
 	shl		$3, %r12
 	add		%r12, %r10		# this is where our PT should be mentioned
 1:
-	cmp		$0, (%r10)		# check whether the table actually exists already
+	cmpq	$0, (%r10)		# check whether the table actually exists already
 	jne		2f
 #make it
 	push	%r10
@@ -461,7 +461,7 @@ identityMapMemory:
 	addq	$4093, %r11			# TODO make better
 	mov		%r11, PT_end
 
-	cmp		$0, (%r10)		# check again whether the table actually exists
+	cmpq	$0, (%r10)		# check again whether the table actually exists
 	jne		2f
 
 	push	%r10
