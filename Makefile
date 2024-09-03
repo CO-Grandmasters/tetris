@@ -34,7 +34,7 @@ out/kernel.o: src/kernel/*.s src/game/*.s | out
 	$(AS) src/kernel/*.s src/game/*.s -o $@
 
 HD_img:
-	dd if=/dev/zero of=$@ count=512
+	dd if=/dev/zero of=$@ count=2048
 
 qemu: all
 	qemu-system-x86_64 HD_img
