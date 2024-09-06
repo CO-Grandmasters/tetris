@@ -251,6 +251,8 @@ no_mtrr:
 3:									# reserved/unusable memory
 	mov		%r10, %r8
 	mov		%r11, %r9
+	cmp     $0x10000000, %r10
+    jge     7f 
 	call	identityMapMemory
 	jmp		7f
 4:									# ACPI reclaimable
