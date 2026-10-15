@@ -17,56 +17,66 @@ You should have received a copy of the GNU General Public License
 along with gamelib-x64. If not, see <http://www.gnu.org/licenses/>.
 */
 
-.macro line x0, y0, x1, y1, col 
-		movq	\x0, %rdi
-		movq 	\y0, %rsi
-		movq	\x1, %rdx
-		movq 	\y1, %rcx
-		movq 	\col, %r8
-		call putLine
-.endm
 
 .file "src/game/game.s"
+.include "src/game/macros.inc"
 
 .global gameInit
 .global gameLoop
 
 .section .game.data
+tickCounter: .byte 60
+squareSize: .byte 16
+.section .game.bss
+gameArray:
+	.skip 200
 
 .section .game.text
 
 gameInit:
 	# Basic demo
 
-	mov		$0, %rdi
-	call	clrScreen
+	setPallette $0, $0xFFFFFF # Screen background white
 
-	mov 	$0, %rdi
-	mov 	$0xFFFFFF, %rsi
-	call  	setPallette
+	setPallette $1, $0xb4b4b4 # Cube 0 (background cube)
+	setPallette $2, $0x464646
 
-	mov 	$1, %rdi
-	mov 	$0x00A6D6, %rsi
-	call  	setPallette
+	# setTimer $19886
 
-	line $17, $129, $176, $112, $1
-	line $17, $129, $20, $159, $1
-	line $20, $159, $188, $198, $1
-	line $188, $198, $316, $191, $1
-	line $316, $191, $176, $112, $1
-	line $34, $126, $188, $198, $1
-	line $119, $128, $140, $65, $1
-	line $140, $65, $163, $132, $1
-	line $202, $196, $143, $156, $1
-	line $142, $156, $162, $154, $1
-	line $162, $154, $302, $192, $1
-
-	movq	$FLAME, %rdi
-	movq	$128, %rsi
-	movq	$22, %rdx
-	call 	putBitmap
+	mov gameArray, %rdi
+	call fillArr
 
 	ret
 
 gameLoop:
+	cmpb $60, tickCounter
+	jl .postDraw
+	clrScreen $0 # Clear screen
+	putBitmap $CUBE0, $0, $0
+	mov $0, tickCounter
+.postDraw:
+	inc tickCounter
+
+	ret
+
+
+
+fillArr:
+	push %rbp
+	mov %rsp, %rbp
+	mov $0, %rcx
+
+.fillArrLoop:
+	cmp $200, %rcx
+	jge .fillArrExit
+
+	mov $0, (%rdi)
+
+	inc %rdi
+	inc %rcx
+	jmp .fillArrLoop
+
+.fillArrExit:
+	mov %rbp, %rsp
+	pop %rbp
 	ret
