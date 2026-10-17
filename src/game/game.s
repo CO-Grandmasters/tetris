@@ -19,12 +19,15 @@ along with gamelib-x64. If not, see <http://www.gnu.org/licenses/>.
 
 
 .file "src/game/game.s"
+.file "src/game/ui.s"
 .include "src/game/macros.inc"
 
 .global gameInit
 .global gameLoop
 
 .section .game.data
+# (screen width - 8*squareSize) / 2
+printingOffset: .quad 112
 tickCounter: .quad 60
 squareSize: .quad 12
 arraySize: .quad 180
@@ -75,7 +78,7 @@ gameLoop:
 	mov gameArray, %rdi
 	mov arraySize, %rsi
 	call printArr
-	mov $0, tickCounter
+  
 .postDraw:
 	inc tickCounter
 
@@ -114,6 +117,8 @@ printArr:
     push %rdi
     push %rcx
     push %r9
+
+    add printingOffset(%rip), %rax			# add printing offset to row
 
     cmpb $0, (%rdi)					# draw different cube color depending on the value in that cell
     je .printCube0
@@ -184,7 +189,12 @@ fillArr:
     cmp %rsi, %rcx				# while %rcx < %rsi
     jge .fillArrExit
 
-    movb $0, (%rdi)
+    mov %rcx, %rax
+    xor %rdx, %rdx
+    mov $10, %r8
+    divq %r8						# %rax = row (quotient), %rdx = col (remainder)
+
+    movb %dl, (%rdi)
 
     inc %rdi
     inc %rcx
