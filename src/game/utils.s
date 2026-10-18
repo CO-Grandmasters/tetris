@@ -1,4 +1,6 @@
 # rdi - pieceArray index
+# rsi - x
+# rdx - y
 mapPieceArrayIndexToGameArrayIndex:
     push %rbp
     mov %rsp, %rbp
@@ -7,8 +9,8 @@ mapPieceArrayIndexToGameArrayIndex:
     push %r13
     push %r14
 
-    movzbq currentX(%rip), %r12
-    movzbq currentY(%rip), %r13
+    mov %rsi, %r12
+    mov %rdx, %r13
 
     mov %rdi, %rax
     mov $0, %rdx

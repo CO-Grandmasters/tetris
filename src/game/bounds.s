@@ -75,6 +75,8 @@ checkOverlap:
     je .checkOverlapLoopNext
 
     mov %rcx, %rdi
+    mov %r8, %rsi
+    mov %r9, %rdx
     call mapPieceArrayIndexToGameArrayIndex
     
     # gameArray[%rax * 1] 
