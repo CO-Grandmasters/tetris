@@ -43,3 +43,45 @@ checkBounds:
 .checkBoundsInvalid:
     mov $0, %rax
     ret
+
+# %rdi - x
+# %rsi - y
+# returns:
+# %rax = 1 if the piece is in a valid position, 0 if not
+checkOverlap:
+    push %rbp
+    mov %rsp, %rbp
+
+    mov $1, %rax
+
+    mov %rbp, %rsp
+    pop %rbp
+    ret
+
+# %rdi - x
+# %rsi - y
+# returns:
+# %rax = 1 if the piece is in a valid position, 0 if not
+isValidPosition:
+    push %rbp
+    mov %rsp, %rbp
+    mov $0, %rax
+
+    push %rdi
+    push %rsi
+    call checkBounds
+    cmp $0, %rax
+    je .isValidPositionExit
+
+    pop %rsi
+    pop %rdi
+    call checkOverlap
+    cmp $0, %rax
+    je .isValidPositionExit
+
+    mov $1, %rax
+
+.isValidPositionExit:
+    mov %rbp, %rsp
+    pop %rbp
+    ret

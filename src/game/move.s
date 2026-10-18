@@ -27,7 +27,7 @@ tryMoveDown:
   movzbq currentY(%rip), %rsi
   add $1, %rsi
   movzbq currentX(%rip), %rdi
-  call checkBounds
+  call isValidPosition
 
     cmp $0, %rax
   je .handleMovementAfterCheck
@@ -42,7 +42,7 @@ tryMoveRight:
     movzbq currentX(%rip), %rdi
   add $1, %rdi
   movzbq currentY(%rip), %rsi
-  call checkBounds
+  call isValidPosition
   cmp $0, %rax
   je .handleMovementAfterCheck
 
@@ -55,7 +55,7 @@ tryMoveLeft:
       movzbq currentX(%rip), %rdi
   sub $1, %rdi
   movzbq currentY(%rip), %rsi
-  call checkBounds
+  call isValidPosition
   cmp $0, %rax
   je .handleMovementAfterCheck
 
