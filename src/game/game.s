@@ -77,6 +77,8 @@ gameLoop:
 	clrScreen $0 # Clear screen
 	mov gameArray, %rdi
 	mov arraySize, %rsi
+    mov $10, %rdx
+    mov printingOffset, %rcx
 	call printArr
   
 .postDraw:
@@ -86,14 +88,19 @@ gameLoop:
 
 # %rdi - array
 # %rsi - array length
+# %rdx - array row size
+# %rcx - offset (pixels)
 # draws array to screen
 printArr:
     push %rbp
     mov %rsp, %rbp
-    mov $0, %rcx
 
     movq squareSize(%rip), %r9		# (squareSize - 1)
     decq %r9
+    mov %rdx, %r10
+    mov %rcx, %r11
+
+    mov $0, %rcx
 
 .printArrLoop:
     cmp %rsi, %rcx					# while %rcx < %rsi
@@ -103,8 +110,7 @@ printArr:
 	# col = %rcx % 10
     mov $0, %rdx
     movq %rcx, %rax
-    movq $10, %r8
-    divq %r8						# %rax = row (quotient), %rdx = col (remainder)
+    divq %r10						# %rax = row (quotient), %rdx = col (remainder)
 
     # scale both by (squareSize - 1)
     imulq %r9, %rax					# %rax = row * (squareSize - 1)
@@ -115,10 +121,14 @@ printArr:
 
     push %rsi						# save caller-saved registers
     push %rdi
+    push %rdx
     push %rcx
     push %r9
+    push %r10
+    push %r11
+    push $0
 
-    add printingOffset(%rip), %rax			# add printing offset to row
+    add %r11, %rax			# add printing offset to row
 
     cmpb $0, (%rdi)					# draw different cube color depending on the value in that cell
     je .printCube0
@@ -138,8 +148,12 @@ printArr:
     je .printCube7
 
 .afterPrint:
-    pop %r9							# restore caller-saved registers
+    pop %r11                    # restore caller-saved registers
+    pop %r11
+    pop %r10
+    pop %r9
     pop %rcx
+    pop %rdx
     pop %rdi
     pop %rsi
 
@@ -189,12 +203,14 @@ fillArr:
     cmp %rsi, %rcx				# while %rcx < %rsi
     jge .fillArrExit
 
-    mov %rcx, %rax
-    xor %rdx, %rdx
-    mov $10, %r8
-    divq %r8						# %rax = row (quotient), %rdx = col (remainder)
+    #mov %rcx, %rax
+    #xor %rdx, %rdx
+    #mov $10, %r8
+    #divq %r8						# %rax = row (quotient), %rdx = col (remainder)
 
-    movb %dl, (%rdi)
+    #movb %dl, (%rdi)
+
+    mov $0, (%rdi)
 
     inc %rdi
     inc %rcx
