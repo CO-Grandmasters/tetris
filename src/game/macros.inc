@@ -1,5 +1,5 @@
-#ifndef MACROS_H
-#define MACROS_H
+.ifndef MACROS_INC
+.set MACROS_INC, 1
 
 /*
  * void setTimer(int16 reloadValue)
@@ -81,4 +81,4 @@
     call    putBitmap
 .endm
 
-#endif
+.endif

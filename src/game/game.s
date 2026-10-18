@@ -19,7 +19,6 @@ along with gamelib-x64. If not, see <http://www.gnu.org/licenses/>.
 
 
 .file "src/game/game.s"
-.file "src/game/ui.s"
 .include "src/game/macros.inc"
 
 .global gameInit
@@ -28,12 +27,18 @@ along with gamelib-x64. If not, see <http://www.gnu.org/licenses/>.
 .section .game.data
 # (screen width - 8*squareSize) / 2
 printingOffset: .quad 112
-tickCounter: .quad 60
+tickCounter: .quad 0
 squareSize: .quad 12
 arraySize: .quad 180
+currentPieceID: .byte 0
+currentX: .byte 0
+currentY: .byte 0
+currentRotation: .byte 0
 .section .game.bss
 gameArray:
 	.skip 180
+pieceArray:
+    .skip 16
 
 .section .game.text
 
@@ -65,158 +70,71 @@ gameInit:
 	setPallette $15, $0xb5a5d5 # Cube 7 (T-piece)
 	setPallette $16, $0x6f3198
 
-	mov gameArray, %rdi
+	mov $gameArray, %rdi        # fill gameArray with 0s
 	mov arraySize, %rsi
+    mov $0, %rdx
 	call fillArr
+
+    mov $pieceArray, %rdi       # fill pieceArray with -1s
+    mov $16, %rsi
+    mov $-1, %rdx
+    call fillArr
+
+    movb $1, currentPieceID
+    call loadPiece
+
+    call printGameArray
 
 	ret
 
 gameLoop:
 	cmpb $60, tickCounter
 	jl .postDraw
+
+    movb $0, tickCounter
+    inc currentY
 	clrScreen $0 # Clear screen
-	mov gameArray, %rdi
-	mov arraySize, %rsi
-    mov $10, %rdx
-    mov printingOffset, %rcx
-	call printArr
+    
+	call printGameArray
+    call printPieceArray
   
 .postDraw:
 	inc tickCounter
-
 	ret
 
-# %rdi - array
-# %rsi - array length
-# %rdx - array row size
-# %rcx - offset (pixels)
-# draws array to screen
-printArr:
+loadPiece:
     push %rbp
     mov %rsp, %rbp
 
-    movq squareSize(%rip), %r9		# (squareSize - 1)
-    decq %r9
-    mov %rdx, %r10
-    mov %rcx, %r11
+    movzbq currentPieceID(%rip), %r8
+    movzbq currentRotation(%rip), %r9
 
-    mov $0, %rcx
+    cmp $1, %r8
+    je .loadPiece1
+    cmp $2, %r8
+    je .loadPiece2
 
-.printArrLoop:
-    cmp %rsi, %rcx					# while %rcx < %rsi
-    jge .printArrExit
-
-    # row = %rcx / 10
-	# col = %rcx % 10
-    mov $0, %rdx
-    movq %rcx, %rax
-    divq %r10						# %rax = row (quotient), %rdx = col (remainder)
-
-    # scale both by (squareSize - 1)
-    imulq %r9, %rax					# %rax = row * (squareSize - 1)
-    movq  %rax, %r8
-
-    movq  %rdx, %rax
-    imulq %r9, %rax					# %rax = col * (squareSize - 1)
-
-    push %rsi						# save caller-saved registers
-    push %rdi
-    push %rdx
-    push %rcx
-    push %r9
-    push %r10
-    push %r11
-    push $0
-
-    add %r11, %rax			# add printing offset to row
-
-    cmpb $0, (%rdi)					# draw different cube color depending on the value in that cell
-    je .printCube0
-    cmpb $1, (%rdi)
-    je .printCube1
-    cmpb $2, (%rdi)
-    je .printCube2
-    cmpb $3, (%rdi)
-    je .printCube3
-    cmpb $4, (%rdi)
-    je .printCube4
-    cmpb $5, (%rdi)
-    je .printCube5
-    cmpb $6, (%rdi)
-    je .printCube6
-    cmpb $7, (%rdi)
-    je .printCube7
-
-.afterPrint:
-    pop %r11                    # restore caller-saved registers
-    pop %r11
-    pop %r10
-    pop %r9
-    pop %rcx
-    pop %rdx
-    pop %rdi
-    pop %rsi
-
-    inc %rcx
-    inc %rdi
-    jmp .printArrLoop
-
-.printArrExit:
+.loadPieceExit:
     mov %rbp, %rsp
     pop %rbp
     ret
 
-.printCube0:
-    putBitmap $CUBE0, %rax, %r8
-    jmp .afterPrint
-.printCube1:
-    putBitmap $CUBE1, %rax, %r8
-    jmp .afterPrint
-.printCube2:
-    putBitmap $CUBE2, %rax, %r8
-    jmp .afterPrint
-.printCube3:
-    putBitmap $CUBE3, %rax, %r8
-    jmp .afterPrint
-.printCube4:
-    putBitmap $CUBE4, %rax, %r8
-    jmp .afterPrint
-.printCube5:
-    putBitmap $CUBE5, %rax, %r8
-    jmp .afterPrint
-.printCube6:
-    putBitmap $CUBE6, %rax, %r8
-    jmp .afterPrint
-.printCube7:
-    putBitmap $CUBE7, %rax, %r8
-    jmp .afterPrint
+.loadPiece1:
+    mov $PIECE1, %rdi
+    mov $16, %rax
+    mul %r9
+    add %rax, %rdi
+    mov $pieceArray, %rsi
+    mov $16, %rdx
+    call copyArr
+    jmp .loadPieceExit
 
-# %rdi - array
-# %rsi - array length
-# fills array with 0s
-fillArr:
-    push %rbp
-    mov %rsp, %rbp
-    mov $0, %rcx
-
-.fillArrLoop:
-    cmp %rsi, %rcx				# while %rcx < %rsi
-    jge .fillArrExit
-
-    #mov %rcx, %rax
-    #xor %rdx, %rdx
-    #mov $10, %r8
-    #divq %r8						# %rax = row (quotient), %rdx = col (remainder)
-
-    #movb %dl, (%rdi)
-
-    mov $0, (%rdi)
-
-    inc %rdi
-    inc %rcx
-    jmp .fillArrLoop
-
-.fillArrExit:
-    mov %rbp, %rsp
-    pop %rbp
-    ret
+.loadPiece2:
+    mov $PIECE2, %rdi
+    mov $16, %rax
+    mul %r9
+    add %rax, %rdi
+    mov $pieceArray, %rsi
+    mov $16, %rdx
+    call copyArr
+    jmp .loadPieceExit
