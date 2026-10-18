@@ -26,6 +26,7 @@ along with gamelib-x64. If not, see <http://www.gnu.org/licenses/>.
 
 .section .game.data
 # (screen width - 8*squareSize) / 2
+
 printingOffset: .quad 112
 tickCounter: .quad 0
 squareSize: .quad 12
@@ -87,6 +88,7 @@ gameInit:
 
     call printGameArray
     call printPieceArray
+    call drawUI
 
 	ret
 
@@ -101,6 +103,7 @@ gameLoop:
     je .putPieceInGameArray
 
     call printGameplay
+    call drawUI
 
 .postDraw:
     xor %rax, %rax
