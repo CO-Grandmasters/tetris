@@ -93,12 +93,17 @@ gameLoop:
 
     movb $0, tickCounter
     inc currentY
-	clrScreen $0 # Clear screen
-    
-	call printGameArray
-    call printPieceArray
+
+  call printGameplay
+
+
   
 .postDraw:
+  xor %rax, %rax
+  readKeyCode
+  mov %rax, %rdi
+  call handleMovement
+
 	inc tickCounter
 	ret
 

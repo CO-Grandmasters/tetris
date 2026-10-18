@@ -138,3 +138,13 @@ printArr:
 .printCube7:
     putBitmap $CUBE7, %rax, %r8
     jmp .afterPrint
+
+printGameplay:
+    push %rbp
+    mov %rsp, %rbp
+    clrScreen $0 # Clear screen
+    call printGameArray
+    call printPieceArray
+    mov %rbp, %rsp
+    pop %rbp
+    ret
