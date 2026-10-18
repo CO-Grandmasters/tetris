@@ -70,6 +70,8 @@ gameInit:
 	setPallette $15, $0xb5a5d5 # Cube 7 (T-piece)
 	setPallette $16, $0x6f3198
 
+    setPallette $17, $0x000000 # Black for text
+
 	mov $gameArray, %rdi        # fill gameArray with 0s
 	mov arraySize, %rsi
     mov $0, %rdx
@@ -80,10 +82,11 @@ gameInit:
     mov $-1, %rdx
     call fillArr
 
-    movb $1, currentPieceID
+    movb $2, currentPieceID
     call loadPiece
 
     call printGameArray
+    call printPieceArray
 
 	ret
 
