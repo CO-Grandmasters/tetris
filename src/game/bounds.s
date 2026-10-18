@@ -2,6 +2,9 @@
 # %rsi - y
 # Returns 1 if the piece is in bounds, 0 if not
 checkBounds:
+    push %rbp
+    mov %rsp, %rbp
+
     mov %rdi, %r8
     mov %rsi, %r9
     mov $0, %rcx
@@ -38,10 +41,16 @@ checkBounds:
 
 .checkBoundsValid:
     mov $1, %rax
+
+    mov %rbp, %rsp
+    pop %rbp
     ret
 
 .checkBoundsInvalid:
     mov $0, %rax
+
+    mov %rbp, %rsp
+    pop %rbp
     ret
 
 # %rdi - x
@@ -52,6 +61,40 @@ checkOverlap:
     push %rbp
     mov %rsp, %rbp
 
+    mov %rdi, %r8
+    mov %rsi, %r9
+    mov $0, %rcx
+    mov $gameArray, %r10
+    mov $pieceArray, %r11
+
+.checkOverlapLoop:
+    cmp $16, %rcx
+    jge .checkOverlapValid
+
+    cmpb $-1, (%r11)
+    je .checkOverlapLoopNext
+
+    mov %rcx, %rdi
+    call mapPieceArrayIndexToGameArrayIndex
+    
+    # gameArray[%rax * 1] 
+    movzbq (%r10,%rax,1), %rax
+    cmp $0, %rax
+    je .checkOverlapLoopNext
+    jmp .checkOverlapInvalid
+
+.checkOverlapLoopNext:
+    inc %rcx
+    inc %r11
+    jmp .checkOverlapLoop
+
+.checkOverlapInvalid:
+    mov $0, %rax
+    
+    mov %rbp, %rsp
+    pop %rbp
+    ret
+.checkOverlapValid:
     mov $1, %rax
 
     mov %rbp, %rsp
