@@ -16,6 +16,7 @@ handleMovement:
 
   # if movement redraw the game and piece arrays
   call printGameplay
+  call drawUI
 .handleMovementExit:
   mov %rbp, %rsp
   pop %rbp
