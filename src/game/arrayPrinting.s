@@ -20,11 +20,11 @@ printPieceArray:
     mov printingOffset, %rcx
     mov squareSize(%rip), %r9
     dec %r9                     # (squareSize - 1)
-    movzbq currentX(%rip), %rax
+    movsbq currentX(%rip), %rax
     imulq %r9, %rax             # currentX * (squareSize - 1)
     add %rax, %rcx              # printingOffset + currentX * (squareSize - 1)
 
-    movzbq currentY(%rip), %rax
+    movsbq currentY(%rip), %rax
     imulq %r9, %rax             # currentY * (squareSize - 1)
     mov %rax, %r8               
 

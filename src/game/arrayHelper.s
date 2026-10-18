@@ -61,14 +61,14 @@ placePieceInGameArray:
     push %r13
     push %r14
 
-    movzbq currentX(%rip), %rdi
-    movzbq currentY(%rip), %rsi
+    movsbq currentX(%rip), %rdi
+    movsbq currentY(%rip), %rsi
     call checkBounds
     test %rax, %rax
     jz .placePieceInGameArrayInvalid
 
-    movzbq currentX(%rip), %r14
-    movzbq currentY(%rip), %rbx
+    movsbq currentX(%rip), %r14
+    movsbq currentY(%rip), %rbx
     mov $0, %r12
     mov $pieceArray, %r13
 
