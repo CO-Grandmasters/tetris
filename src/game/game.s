@@ -97,19 +97,36 @@ gameLoop:
 	jl .postDraw
 
     movb $0, tickCounter
-    inc currentY
+    
+    call tryMoveDown
+    cmp $0, %rax
+    je .putPieceInGameArray
 
     call printGameplay
     call drawUI
 
 .postDraw:
-  xor %rax, %rax
-  readKeyCode
-  mov %rax, %rdi
-  call handleMovement
+    xor %rax, %rax
+    readKeyCode
+    mov %rax, %rdi
+    call handleMovement
 
 	inc tickCounter
 	ret
+
+.putPieceInGameArray:
+    call placePieceInGameArray      # put piece in gameArray
+    test %rax, %rax
+    jz .postDraw
+
+    movb $1, currentPieceID(%rip)   # prep new piece
+    movb $0, currentRotation(%rip)
+    movb $0, currentX(%rip)
+    movb $0, currentY(%rip)
+    call loadPiece
+    call printGameplay
+
+    jmp .postDraw                   # go back to gameLoop
 
 loadPiece:
     push %rbp

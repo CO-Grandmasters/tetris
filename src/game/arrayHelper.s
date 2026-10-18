@@ -52,3 +52,59 @@ copyArr:
     mov %rbp, %rsp
     pop %rbp
     ret
+
+placePieceInGameArray:
+    push %rbp
+    mov %rsp, %rbp
+    push %rbx
+    push %r12
+    push %r13
+    push %r14
+
+    movzbq currentX(%rip), %rdi
+    movzbq currentY(%rip), %rsi
+    call checkBounds
+    test %rax, %rax
+    jz .placePieceInGameArrayInvalid
+
+    movzbq currentX(%rip), %r14
+    movzbq currentY(%rip), %rbx
+    mov $0, %r12
+    mov $pieceArray, %r13
+
+.placePieceInGameArrayLoop:
+    cmp $16, %r12
+    jge .placePieceInGameArrayEnd
+
+    cmpb $-1, (%r13,%r12,1)
+    je .placePieceInGameArrayNext
+
+    mov %r12, %rdi
+    mov %r14, %rsi
+    mov %rbx, %rdx
+    call mapPieceArrayIndexToGameArrayIndex
+
+    mov $gameArray, %rdi
+    add %rax, %rdi
+    movb (%r13,%r12,1), %al
+    movb %al, (%rdi)
+
+.placePieceInGameArrayNext:
+    inc %r12
+    jmp .placePieceInGameArrayLoop
+
+.placePieceInGameArrayEnd:
+    mov $1, %rax
+    jmp .placePieceInGameArrayExit
+
+.placePieceInGameArrayInvalid:
+    xor %eax, %eax
+
+.placePieceInGameArrayExit:
+    pop %r14
+    pop %r13
+    pop %r12
+    pop %rbx
+    mov %rbp, %rsp
+    pop %rbp
+    ret
