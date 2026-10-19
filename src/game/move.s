@@ -104,6 +104,7 @@ switchHold:
   pop %rbp
   ret
 .firstHoldPiece:
+  # If new piece, generate random piece and swap
   call getRandomNumberBetween1And7
   movb %al, holdPieceID
   jmp .switchHoldAfterCheck

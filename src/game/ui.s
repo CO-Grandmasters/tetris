@@ -100,14 +100,17 @@ drawTop3Times:
     cmp $3, %r14
     jge .drawTop3TimesExit
 
+    # is scoreArray[%r14 * 4]  a valid score
     movl (%r12,%r14,4), %edi
     cmpl $0, %edi
     je .drawTop3TimesNA
 
+    # Draw the score at x=10, y=145 + 15 * %r14
     mov %r13, %rsi
     mov %r15, %rdx
     call drawDecimal
 
+    # Draw the seconds string at x=10 + width of the score, y=145 + 15 * %r14
     mov $secondsString, %rdi
     mov %rax, %rsi
     mov %r15, %rdx
@@ -115,11 +118,13 @@ drawTop3Times:
     jmp .drawTop3TimesNext
 
 .drawTop3TimesNA:
+    # Draw "N/A" at x=10, y=145 + 15 * %r14
     mov %r13, %rdi
     mov %r15, %rsi
     call drawNA
 
 .drawTop3TimesNext:
+    # Increment loop counter and y position for next score
     inc %r14
     add $15, %r15
     jmp .drawTop3TimesLoop
@@ -221,12 +226,14 @@ drawGameOverBackground:
 drawChar:
     push %rbp
     mov %rsp, %rbp
-    mov %rsi, -8(%rbp)
-    mov %rdx, -16(%rbp)
+    mov %rsi, -8(%rbp) # x
+    mov %rdx, -16(%rbp) # y
     sub $16, %rsp
 
+    # Move char to %rax for comparison
     movzbq %dil, %rax
 
+    # If char is a number (0-9), call getNumberBitmap
     cmp $48, %rax
     jl .drawCharCheckLetter
     cmp $57, %rax
@@ -236,6 +243,7 @@ drawChar:
     jmp .drawCharPutBitmap
 
 .drawCharCheckLetter:
+    # If char is an uppercase letter (A-Z), call getUppercaseBitmap
     cmp $65, %rax
     jl .drawCharCheckSeparator
     cmp $90, %rax
@@ -245,6 +253,7 @@ drawChar:
     jmp .drawCharPutBitmap
 
 .drawCharCheckSeparator:
+    # If char is a slash or a colon, draw it
     cmp $47, %rax
     je .drawCharSlash
     cmp $58, %rax
@@ -262,6 +271,7 @@ drawChar:
     test %rax, %rax
     jz .drawCharExit
 
+    # Draw the bitmap at x and y
     mov %rax, %rdi
     mov -8(%rbp), %rsi
     mov -16(%rbp), %rdx
@@ -282,20 +292,23 @@ drawString:
     push %r13
     push %r14
 
-    mov %rdi, %r12
-    mov %rsi, %r13
-    mov %rdx, %r14
+    mov %rdi, %r12 # string
+    mov %rsi, %r13 # x
+    mov %rdx, %r14 # y
 
 .drawStringLoop:
+    # Save current character and check if it's null terminator
     movzbq (%r12), %rax
     test %rax, %rax
     jz .drawStringExit
 
+    # Draw the character at x and y
     mov %rax, %rdi
     mov %r13, %rsi
     mov %r14, %rdx
     call drawChar
 
+    # Go to the next character in the string and increment x position by 5
     inc %r12
     add $5, %r13
     jmp .drawStringLoop
@@ -328,12 +341,21 @@ drawDecimal:
 
 # Store all digits in reverse order on the stack, then pop them off to draw in correct order
 .drawDecimalConvertLoop:
+    # Divide %r12 by 10
     mov %r12, %rax
+
+    # Prepare %rdx for division
     xor %rdx, %rdx
     divq %r8
+
+    # Get ASCII character for the digit and push it onto the stack
     add $48, %rdx
     push %rdx
+
+    # Increment digit counter
     inc %r15
+
+    # Update %r12 with the quotient for the next iteration
     mov %rax, %r12
     cmp $0, %rax
     je .drawDecimalDraw
@@ -341,14 +363,17 @@ drawDecimal:
 
 # Draw the digits in correct order
 .drawDecimalDraw:
+    # Until digit counter = 0 loop
     cmp $0, %r15
     je .drawDecimalExit
 
+    # Pop the top digit from the stack and draw it
     pop %rdi
     mov %r13, %rsi
     mov %r14, %rdx
     call drawChar
-
+    
+    # Increment x position by 5 for the next digit
     add $5, %r13
     dec %r15
     jmp .drawDecimalDraw
