@@ -7,11 +7,31 @@
 # uint64_t constrained_result = (seed % 7) + 1
 # return constrained_result;
 
-
 .section .game.data
 seed: .quad 88172645463325252
 
 .section .game.text
+randomizeSeed:
+    push %rbp
+    movq %rsp, %rbp
+
+    # ask the CPU how many ticks it did since it woke up.
+    # it puts half the number in eax and the other half in edx.
+    rdtsc               
+
+    # make room for the upper half of the ticks in %rdx
+    shlq $32, %rdx
+    # Combine %rdx and %rax into %rax
+    orq %rdx, %rax      
+    
+    cmp $0, %rax
+    je .randomizeSeedExit         
+
+    movq %rax, seed(%rip)
+.randomizeSeedExit:
+    movq %rbp, %rsp
+    pop %rbp
+    ret
 
 # Returns a random number between 1 and 7 (inclusive)
 getRandomNumberBetween1And7:

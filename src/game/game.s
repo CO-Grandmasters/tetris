@@ -87,6 +87,9 @@ gameInit:
     mov $-1, %rdx
     call fillArr
 
+    call randomizeSeed
+    call getRandomNumberBetween1And7
+    movb %al, currentPieceID(%rip)   # prep new piece
     call loadPiece
 
     call printGameArray
