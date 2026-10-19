@@ -1,6 +1,7 @@
 .section .game.data
 # Top 3 times - each time is 4 bytes, so 12 bytes total
 scoreArray: .skip 12
+hasAddedNewScoreThisSession: .quad 0
 
 initScoreArray:
     push %rbp
@@ -28,7 +29,10 @@ addScoreToLeaderboard:
     push %rbp
     mov %rsp, %rbp
     push %r12
-    push %rbx
+    push %r13
+
+    cmp $1, hasAddedNewScoreThisSession(%rip)
+    je .addScoreToLeaderboardExit
 
     # Load the current scores into registers
     lea scoreArray(%rip), %r12
@@ -47,6 +51,7 @@ addScoreToLeaderboard:
     movl %eax, 4(%r12)   # Move old best to second place
     movl %ebx, 8(%r12)   # Move old second to third place
     movl %edi, (%r12)     # Insert new best score
+    mov $1, hasAddedNewScoreThisSession(%rip)
     jmp .addScoreToLeaderboardExit
 
 .addScoreToLeaderboardCheckSecond:
@@ -59,6 +64,7 @@ addScoreToLeaderboard:
     # New score is the second best score
     movl %ebx, 8(%r12)   # Move old second to third place
     movl %edi, 4(%r12)     # Insert new second best score
+    mov $1, hasAddedNewScoreThisSession(%rip)
     jmp .addScoreToLeaderboardExit
 
 .addScoreToLeaderboardCheckThird:
@@ -70,8 +76,9 @@ addScoreToLeaderboard:
 .addScoreToLeaderboardAddThird:
     # New score is the third best score
     movl %edi, 8(%r12)     # Insert new third best score
+    mov $1, hasAddedNewScoreThisSession(%rip)
 .addScoreToLeaderboardExit:
-    pop %rbx
+    pop %r13
     pop %r12
     mov %rbp, %rsp
     pop %rbp

@@ -52,6 +52,8 @@ pieceArray:
 .section .game.text
 
 gameInit:
+    call initScoreArray
+postScoreLoadGameInit:
 	# 0=Empty, 1=I, 2=J, 3=L, 4=O, 5=S, 6=Z, 7=t
 	setPallette $0, $0xFFFFFF # Screen background white
 
@@ -104,7 +106,6 @@ gameInit:
     call printPieceArray
     call drawUI
     call printHoldPiece
-    call initScoreArray
 
 	ret
 
@@ -193,6 +194,8 @@ gameLoop:
     ret
 
 .renderGameStateWin:
+    mov timeInSeconds(%rip), %rdi
+    call addScoreToLeaderboard
     call drawYouWin
     ret
 
@@ -205,5 +208,6 @@ gameLoop:
     movb $3, currentX(%rip)
     movb $0, currentY(%rip)
     movb $0, currentRotation(%rip)
+    mov $0, hasAddedNewScoreThisSession(%rip)
 
-    jmp gameInit
+    jmp postScoreLoadGameInit
