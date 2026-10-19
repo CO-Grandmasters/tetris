@@ -9,11 +9,11 @@ mapPieceArrayIndexToGameArrayIndex:
     push %r13
     push %r14
 
-    mov %rsi, %r12
-    mov %rdx, %r13
+    mov %rsi, %r12 # %r12 = x
+    mov %rdx, %r13 # %r13 = y
 
-    mov %rdi, %rax
-    mov $0, %rdx
+    mov %rdi, %rax # %rax = pieceArray index
+    mov $0, %rdx # reset %rdx for division
     mov $4, %r14
     div %r14                    # rax = row, rdx = col
 
@@ -60,8 +60,10 @@ loadPiece:
 .loadPiece1:
     mov $PIECE1, %rdi
     mov $16, %rax
-    mul %r9
+    mul %r9 # multiply rotation by 16 to get the correct piece offset
     add %rax, %rdi
+
+    # Copy the piece data to the current pieceArray
     mov $pieceArray, %rsi
     mov $16, %rdx
     call copyArr
