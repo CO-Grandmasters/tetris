@@ -122,7 +122,8 @@ gameLoop:
     test %rax, %rax
     jz .postDraw
 
-    movb $1, currentPieceID(%rip)   # prep new piece
+    call getRandomNumberBetween1And7
+    movb %al, currentPieceID(%rip)   # prep new piece
     movb $0, currentRotation(%rip)
     movb $3, currentX(%rip)
     movb $0, currentY(%rip)
