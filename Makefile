@@ -30,8 +30,8 @@ out/kernel: out/kernel.o src/kernel/link_kernel.ld | HD_img
 out/boot.o: src/bootloader/*.s | out
 	$(AS) src/bootloader/*.s -o $@
 
-out/kernel.o: src/kernel/*.s src/game/*.s src/game/cubes/*.s src/game/pieces/*.s | out
-	$(AS) src/kernel/*.s src/game/*.s src/game/cubes/*.s src/game/pieces/*.s -o $@
+out/kernel.o: src/kernel/*.s src/game/*.s src/game/cubes/*.s src/game/pieces/*.s src/game/characters/*.s | out
+	$(AS) src/kernel/*.s src/game/*.s src/game/cubes/*.s src/game/pieces/*.s src/game/characters/*.s -o $@
 
 HD_img:
 	dd if=/dev/zero of=$@ count=2048

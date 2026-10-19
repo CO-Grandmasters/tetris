@@ -48,7 +48,6 @@ drawChar:
 # %rdi - string
 # %rsi - x
 # %rdx - y
-.global drawString
 drawString:
     push %rbp
     mov %rsp, %rbp
