@@ -2,6 +2,9 @@
 linesString: .asciz "LINES"
 timeString: .asciz "TIME"
 secondsString: .asciz "S"
+youWinString: .asciz "YOU WIN"
+youLoseString: .asciz "YOU LOSE"
+playAgainString: .asciz "PRESS R TO PLAY AGAIN"
 
 .section .game.text
 
@@ -45,6 +48,73 @@ drawUI:
     mov %rax, %rsi
     mov $120, %rdx
     call drawString
+
+    mov %rbp, %rsp
+    pop %rbp
+    ret
+
+drawYouWin:
+    push %rbp
+    mov %rsp, %rbp
+
+    call drawGameOverBackground
+
+    mov $youWinString, %rdi
+    mov $143, %rsi
+    mov $90, %rdx
+    call drawString
+
+    mov $playAgainString, %rdi
+    mov $108, %rsi
+    mov $105, %rdx
+    call drawString
+
+    mov %rbp, %rsp
+    pop %rbp
+    ret
+
+drawYouLose:
+    push %rbp
+    mov %rsp, %rbp
+
+    call drawGameOverBackground
+
+    mov $youLoseString, %rdi
+    mov $140, %rsi
+    mov $90, %rdx
+    call drawString
+
+    mov $playAgainString, %rdi
+    mov $108, %rsi
+    mov $105, %rdx
+    call drawString
+
+    mov %rbp, %rsp
+    pop %rbp
+    ret
+
+drawGameOverBackground:
+    push %rbp
+    mov %rsp, %rbp
+    # Start drawing the background at y=85
+    movq $85, -8(%rbp)
+    sub $16, %rsp
+
+.drawGameOverBackgroundLoop:
+    # Draw one horizontal line from x=95 to x=225
+    mov -8(%rbp), %rsi
+    mov $95, %rdi
+    mov $225, %rdx
+    mov %rsi, %rcx
+    mov $0, %r8
+    call putLine
+
+    # Move to the next line
+    incq -8(%rbp)
+    
+    # Stop after drawing through y=115
+    cmpq $116, -8(%rbp)
+    jl .drawGameOverBackgroundLoop
 
     mov %rbp, %rsp
     pop %rbp

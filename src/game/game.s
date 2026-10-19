@@ -25,11 +25,12 @@ along with gamelib-x64. If not, see <http://www.gnu.org/licenses/>.
 .global gameLoop
 
 .section .game.data
-# (screen width - 8*squareSize) / 2
-
+# -1 - lost, 0 - playing, 1 - won
+gameState: .quad -1
 timeInSeconds: .quad 0
 completedLines: .quad 0
 maxLines: .quad 40
+# (screen width - 8*squareSize) / 2
 printingOffset: .quad 112
 tickCounter: .quad 0
 ticksUntilMoveDown: .quad 60
@@ -99,6 +100,15 @@ gameInit:
 	ret
 
 gameLoop:
+    cmpq $0, gameState(%rip)
+    jne .renderGameState
+    mov completedLines(%rip), %rax
+    cmp maxLines(%rip), %rax
+    jl .gameStatePlaying
+    movq $1, gameState(%rip)
+    jmp .renderGameState
+
+.gameStatePlaying:
     cmpb $60, tickCounter
     jge .incrementSeconds
 .postIncrementSeconds:
@@ -129,18 +139,41 @@ gameLoop:
 .putPieceInGameArray:
     call placePieceInGameArray      # put piece in gameArray
     test %rax, %rax
-    jz .postDraw
+    jnz .loadNextPiece
+    movq $-1, gameState(%rip)
+    jmp .renderGameState
 
+.loadNextPiece:
     call getRandomNumberBetween1And7
     movb %al, currentPieceID(%rip)   # prep new piece
     movb $0, currentRotation(%rip)
     movb $3, currentX(%rip)
     movb $0, currentY(%rip)
     call loadPiece
+    movsbq currentX(%rip), %rdi
+    movsbq currentY(%rip), %rsi
+    call isValidPosition
+    test %rax, %rax
+    jz .setGameStateLost
     call printGameplay
     call drawUI
 
     jmp .postDraw                   # go back to gameLoop
+
+.setGameStateLost:
+    movq $-1, gameState(%rip)
+
+.renderGameState:
+    call printGameplay
+    call drawUI
+    cmpq $1, gameState(%rip)
+    je .renderGameStateWin
+    call drawYouLose
+    ret
+
+.renderGameStateWin:
+    call drawYouWin
+    ret
 
 loadPiece:
     push %rbp
