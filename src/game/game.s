@@ -97,6 +97,7 @@ gameInit:
     call printGameArray
     call printPieceArray
     call drawUI
+    call initScoreArray
 
 	ret
 

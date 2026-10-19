@@ -2,6 +2,8 @@
 linesString: .asciz "LINES"
 timeString: .asciz "TIME"
 secondsString: .asciz "S"
+naString: .asciz "N/A"
+bestTimesString: .asciz "BEST TIMES"
 youWinString: .asciz "YOU WIN"
 youLoseString: .asciz "YOU LOSE"
 playAgainString: .asciz "PRESS R TO PLAY AGAIN"
@@ -12,41 +14,134 @@ drawUI:
     push %rbp
     mov %rsp, %rbp
 
+    call drawLinesBundle
+    call drawTimeBundle
+    call drawTop3Times
+
+    mov %rbp, %rsp
+    pop %rbp
+    ret
+
+drawLinesBundle:
+    push %rbp
+    mov %rsp, %rbp
+
     mov $linesString, %rdi
-    mov $40, %rsi
-    mov $70, %rdx
+    mov $70, %rsi
+    mov $130, %rdx
     call drawString
 
     mov completedLines(%rip), %rdi
-    mov $40, %rsi
-    mov $85, %rdx
+    mov $70, %rsi
+    mov $145, %rdx
     call drawDecimal
 
     mov $47, %rdi
     push %rax
     mov %rax, %rsi
-    mov $85, %rdx
+    mov $145, %rdx
     call drawChar
 
     pop %rsi
     mov maxLines(%rip), %rdi
     add $5, %rsi
-    mov $85, %rdx
+    mov $145, %rdx
     call drawDecimal
 
+    mov %rbp, %rsp
+    pop %rbp
+    ret
+
+drawTimeBundle:
+    push %rbp
+    mov %rsp, %rbp
+
     mov $timeString, %rdi
-    mov $40, %rsi
-    mov $105, %rdx
+    mov $70, %rsi
+    mov $165, %rdx
     call drawString
 
     mov timeInSeconds(%rip), %rdi
-    mov $40, %rsi
-    mov $120, %rdx
+    mov $70, %rsi
+    mov $180, %rdx
     call drawDecimal
 
     mov $secondsString, %rdi
     mov %rax, %rsi
-    mov $120, %rdx
+    mov $180, %rdx
+    call drawString
+
+    mov %rbp, %rsp
+    pop %rbp
+    ret
+
+# Draw the three recorded leaderboard times.
+drawTop3Times:
+    push %rbp
+    mov %rsp, %rbp
+    push %r12
+    push %r13
+    push %r14
+    push %r15
+
+    # draw Best Times at  x=10, y=130
+    mov $scoreArray, %r12
+    mov $bestTimesString, %rdi
+    mov $10, %rsi
+    mov $130, %rdx
+    call drawString
+
+    # Init x=10, y=145, and loop counter
+    mov $10, %r13
+    mov $145, %r15
+    mov $0, %r14
+
+.drawTop3TimesLoop:
+    cmp $3, %r14
+    jge .drawTop3TimesExit
+
+    movl (%r12,%r14,4), %edi
+    cmpl $0, %edi
+    je .drawTop3TimesNA
+
+    mov %r13, %rsi
+    mov %r15, %rdx
+    call drawDecimal
+
+    mov $secondsString, %rdi
+    mov %rax, %rsi
+    mov %r15, %rdx
+    call drawString
+    jmp .drawTop3TimesNext
+
+.drawTop3TimesNA:
+    mov %r13, %rdi
+    mov %r15, %rsi
+    call drawNA
+
+.drawTop3TimesNext:
+    inc %r14
+    add $15, %r15
+    jmp .drawTop3TimesLoop
+
+.drawTop3TimesExit:
+    pop %r15
+    pop %r14
+    pop %r13
+    pop %r12
+    mov %rbp, %rsp
+    pop %rbp
+    ret
+
+# %rdi - x
+# %rsi - y
+drawNA:
+    push %rbp
+    mov %rsp, %rbp
+
+    mov %rsi, %rdx
+    mov %rdi, %rsi
+    mov $naString, %rdi
     call drawString
 
     mov %rbp, %rsp
