@@ -16,6 +16,8 @@ handleMovement:
   je .handleResetGame
   cmp $0x2A, %rdi
   je .handleHold
+  cmp $0x39, %rdi
+  je .handleHardDrop
   xor %eax, %eax
   jmp .handleMovementAfterCheck
 
@@ -24,6 +26,9 @@ handleMovement:
   jmp .handleMovementAfterCheck
 .handleHold:
   call switchHold
+  jmp .handleMovementAfterCheck
+.handleHardDrop:
+  call hardDrop
   jmp .handleMovementAfterCheck
 .handleMovementLeft:
   call tryMoveLeft
@@ -102,6 +107,24 @@ switchHold:
   call getRandomNumberBetween1And7
   movb %al, holdPieceID
   jmp .switchHoldAfterCheck
+
+hardDrop:
+  push %rbp
+  mov %rsp, %rbp
+
+.hardDropLoop:
+  call tryMoveDown
+  cmpb $0, %al
+  je .hardDropExit
+  jmp .hardDropLoop
+
+.hardDropExit:
+  call printGameplay
+  movb $0, holdFlag
+  movb $0, ticksUntilMoveDown
+  mov %rbp, %rsp
+  pop %rbp
+  ret
 
 tryMoveDown:
   push %rbp
