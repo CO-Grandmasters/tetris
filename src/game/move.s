@@ -14,10 +14,16 @@ handleMovement:
   je .handleMovementDown
   cmp $0x13, %rdi
   je .handleResetGame
+  cmp $0x2A, %rdi
+  je .handleHold
   xor %eax, %eax
   jmp .handleMovementAfterCheck
+
 .hanleRotateClockwise:
   call tryRotateClockwise
+  jmp .handleMovementAfterCheck
+.handleHold:
+  call switchHold
   jmp .handleMovementAfterCheck
 .handleMovementLeft:
   call tryMoveLeft
@@ -66,6 +72,36 @@ tryRotateClockwise:
   mov %rbp, %rsp
   pop %rbp
   ret
+
+switchHold:
+  push %rbp
+  mov %rsp, %rbp
+
+  cmpb $1, holdFlag
+  je .switchHoldExit
+  cmpb $0, holdPieceID
+  je .firstHoldPiece
+.switchHoldAfterCheck:
+  movb holdPieceID, %r8b
+  movb currentPieceID, %r9b
+  movb %r8b, currentPieceID
+  movb %r9b, holdPieceID
+  movb $0, currentRotation
+  movb $3, currentX
+  movb $0, currentY
+  movb $1, holdFlag
+
+  call loadPiece
+
+
+.switchHoldExit:
+  mov %rbp, %rsp
+  pop %rbp
+  ret
+.firstHoldPiece:
+  call getRandomNumberBetween1And7
+  movb %al, holdPieceID
+  jmp .switchHoldAfterCheck
 
 tryMoveDown:
   push %rbp

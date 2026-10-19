@@ -32,11 +32,14 @@ completedLines: .quad 0
 maxLines: .quad 40
 # (screen width - 8*squareSize) / 2
 printingOffset: .quad 112
+holdPieceOffset: .quad 56
+holdFlag: .byte 0
 tickCounter: .quad 0
 ticksUntilMoveDown: .quad 60
 squareSize: .quad 12
 arraySize: .quad 180
 currentPieceID: .byte 1
+holdPieceID: .byte 1
 currentX: .byte 3
 currentY: .byte 0
 currentRotation: .byte 0
@@ -93,10 +96,14 @@ gameInit:
     movb %al, currentPieceID(%rip)   # prep new piece
     call loadPiece
 
+    mov $0, holdPieceID
+    mov $0, holdFlag
+
     clrScreen $0 
     call printGameArray
     call printPieceArray
     call drawUI
+    call printHoldPiece
     call initScoreArray
 
 	ret
@@ -139,6 +146,7 @@ gameLoop:
     jmp .postIncrementSeconds
 
 .putPieceInGameArray:
+    movb $0, holdFlag
     call placePieceInGameArray      # put piece in gameArray
     cmp $0, %rax
     jne .clearLines

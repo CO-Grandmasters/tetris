@@ -145,6 +145,62 @@ printGameplay:
     clrScreen $0 # Clear screen
     call printGameArray
     call printPieceArray
+    call drawUI
+    call printHoldPiece
+    mov %rbp, %rsp
+    pop %rbp
+    ret
+
+printHoldPiece:
+    push %rbp
+    mov %rsp, %rbp
+
+    cmpb $0, holdPieceID(%rip)
+    je .printHoldPieceExit
+    cmpb $1, holdPieceID(%rip)
+    je .printHoldPiece1
+    cmpb $2, holdPieceID(%rip)
+    je .printHoldPiece2
+    cmpb $3, holdPieceID(%rip)
+    je .printHoldPiece3
+    cmpb $4, holdPieceID(%rip)
+    je .printHoldPiece4
+    cmpb $5, holdPieceID(%rip)
+    je .printHoldPiece5
+    cmpb $6, holdPieceID(%rip)
+    je .printHoldPiece6
+    cmpb $7, holdPieceID(%rip)
+    je .printHoldPiece7
+
+.printHoldPiece1:
+    mov $PIECE1, %rdi
+    jmp .printHoldPiecePrint
+.printHoldPiece2:
+    mov $PIECE2, %rdi
+    jmp .printHoldPiecePrint
+.printHoldPiece3:
+    mov $PIECE3, %rdi
+    jmp .printHoldPiecePrint
+.printHoldPiece4:
+    mov $PIECE4, %rdi
+    jmp .printHoldPiecePrint
+.printHoldPiece5:
+    mov $PIECE5, %rdi
+    jmp .printHoldPiecePrint
+.printHoldPiece6:
+    mov $PIECE6, %rdi
+    jmp .printHoldPiecePrint
+.printHoldPiece7:
+    mov $PIECE7, %rdi
+
+.printHoldPiecePrint:
+    mov $16, %rsi
+    mov $4, %rdx
+    mov holdPieceOffset, %rcx
+    mov $30, %r8
+    call printArr
+
+.printHoldPieceExit:
     mov %rbp, %rsp
     pop %rbp
     ret
