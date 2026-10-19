@@ -12,6 +12,8 @@ handleMovement:
   je .handleMovementRight
   cmp $0x50, %rdi
   je .handleMovementDown
+  cmp $0x13, %rdi
+  je .handleResetGame
   xor %eax, %eax
   jmp .handleMovementAfterCheck
 .hanleRotateClockwise:
@@ -28,6 +30,10 @@ handleMovement:
   cmp $0, %rax
   je .handleMovementAfterCheck
   movb $60, ticksUntilMoveDown
+  jmp .handleMovementAfterCheck
+.handleResetGame:
+  call .resetGame
+  jmp .handleMovementAfterCheck
 .handleMovementAfterCheck:
   cmp $0, %rax
   je .handleMovementExit

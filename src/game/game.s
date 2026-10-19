@@ -93,6 +93,7 @@ gameInit:
     movb %al, currentPieceID(%rip)   # prep new piece
     call loadPiece
 
+    clrScreen $0 
     call printGameArray
     call printPieceArray
     call drawUI
@@ -171,6 +172,10 @@ gameLoop:
     movq $-1, gameState(%rip)
 
 .renderGameState:
+    xor %rax, %rax
+    readKeyCode
+    cmp $0x13, %rax
+    je .resetGame
     call printGameplay
     call drawUI
     cmpq $1, gameState(%rip)
@@ -182,99 +187,14 @@ gameLoop:
     call drawYouWin
     ret
 
-loadPiece:
-    push %rbp
-    mov %rsp, %rbp
+.resetGame:
+    movq $0, gameState(%rip)
+    movq $0, timeInSeconds(%rip)
+    movq $0, completedLines(%rip)
+    movq $0, tickCounter(%rip)
+    movb $60, ticksUntilMoveDown(%rip)
+    movb $3, currentX(%rip)
+    movb $0, currentY(%rip)
+    movb $0, currentRotation(%rip)
 
-    movzbq currentPieceID(%rip), %r8
-    movzbq currentRotation(%rip), %r9
-
-    cmp $1, %r8
-    je .loadPiece1
-    cmp $2, %r8
-    je .loadPiece2
-    cmp $3, %r8
-    je .loadPiece3
-    cmp $4, %r8
-    je .loadPiece4
-    cmp $5, %r8
-    je .loadPiece5
-    cmp $6, %r8
-    je .loadPiece6
-    cmp $7, %r8
-    je .loadPiece7
-
-.loadPieceExit:
-    mov %rbp, %rsp
-    pop %rbp
-    ret
-
-.loadPiece1:
-    mov $PIECE1, %rdi
-    mov $16, %rax
-    mul %r9
-    add %rax, %rdi
-    mov $pieceArray, %rsi
-    mov $16, %rdx
-    call copyArr
-    jmp .loadPieceExit
-
-.loadPiece2:
-    mov $PIECE2, %rdi
-    mov $16, %rax
-    mul %r9
-    add %rax, %rdi
-    mov $pieceArray, %rsi
-    mov $16, %rdx
-    call copyArr
-    jmp .loadPieceExit
-
-.loadPiece3:
-    mov $PIECE3, %rdi
-    mov $16, %rax
-    mul %r9
-    add %rax, %rdi
-    mov $pieceArray, %rsi
-    mov $16, %rdx
-    call copyArr
-    jmp .loadPieceExit
-
-.loadPiece4:
-    mov $PIECE4, %rdi
-    mov $16, %rax
-    mul %r9
-    add %rax, %rdi
-    mov $pieceArray, %rsi
-    mov $16, %rdx
-    call copyArr
-    jmp .loadPieceExit
-
-.loadPiece5:
-    mov $PIECE5, %rdi
-    mov $16, %rax
-    mul %r9
-    add %rax, %rdi
-    mov $pieceArray, %rsi
-    mov $16, %rdx
-    call copyArr
-    jmp .loadPieceExit
-
-.loadPiece6:
-    mov $PIECE6, %rdi
-    mov $16, %rax
-    mul %r9
-    add %rax, %rdi
-    mov $pieceArray, %rsi
-    mov $16, %rdx
-    call copyArr
-    jmp .loadPieceExit
-
-.loadPiece7:
-    mov $PIECE7, %rdi
-    mov $16, %rax
-    mul %r9
-    add %rax, %rdi
-    mov $pieceArray, %rsi
-    mov $16, %rdx
-    call copyArr
-    jmp .loadPieceExit
+    jmp gameInit
