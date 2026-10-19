@@ -34,7 +34,7 @@ maxLines: .quad 40
 printingOffset: .quad 112
 holdPieceOffset: .quad 56
 holdFlag: .byte 0
-tickCounter: .quad 0
+tickCounter: .quad 0			# 60 ticks/s
 ticksUntilMoveDown: .quad 60
 squareSize: .quad 12
 arraySize: .quad 180
@@ -98,38 +98,37 @@ postScoreLoadGameInit:
     movb %al, currentPieceID(%rip)   # prep new piece
     call loadPiece
 
-    mov $0, holdPieceID
+    mov $0, holdPieceID              # reset hold params
     mov $0, holdFlag
 
     clrScreen $0 
-    call printGameArray
-    call printPieceArray
-    call drawUI
-    call printHoldPiece
+    call printGameplay              # print game arr,
+                                    # piece arr, ui and
+									# hold piece (it's 0 so just clears)
 
 	ret
 
 gameLoop:
     cmpq $0, gameState(%rip)
-    jne .renderGameState
-    mov completedLines(%rip), %rax
-    cmp maxLines(%rip), %rax
-    jl .gameStatePlaying
-    movq $1, gameState(%rip)
+    jne .renderGameState			# if gameState != playing
+    mov completedLines(%rip), %rax	
+    cmp maxLines(%rip), %rax		# if cleared lines < goal
+    jl .gameStatePlaying			
+    movq $1, gameState(%rip)		# else gameState = won
     jmp .renderGameState
 
 .gameStatePlaying:
     cmpb $60, tickCounter
-    jge .incrementSeconds
+    jge .incrementSeconds			# increment seconds every 60 ticks
 .postIncrementSeconds:
     call drawUI
-	cmpb $0, ticksUntilMoveDown
+	cmpb $0, ticksUntilMoveDown		# automatically move down once every 60 ticks
 	jg .postDraw
 .handleMoveDown:
-    movb $60, ticksUntilMoveDown
+    movb $60, ticksUntilMoveDown	# reset counter
     call tryMoveDown
     cmp $0, %rax
-    je .putPieceInGameArray
+    je .putPieceInGameArray			# if can't move down, confirm piece
     call printGameplay
 .postDraw:
     xor %rax, %rax
@@ -148,19 +147,19 @@ gameLoop:
 
 .putPieceInGameArray:
     movb $0, holdFlag
-    call placePieceInGameArray      # put piece in gameArray
-    cmp $0, %rax
+    call placePieceInGameArray      # write piece to gameArray
+    cmp $0, %rax					# if placed successful -> clear lines
     jne .clearLines
-    movq $-1, gameState(%rip)
+    movq $-1, gameState(%rip)		# else gameState = lose
     jmp .renderGameState
 .clearLines:
-    call findCompletedRow
-    cmp $-1, %rax
+    call findCompletedRow			
+    cmp $-1, %rax					# if no completed rows, stop loop
     je .generateNewPiece
     mov %rax, %rdi
-    call removeGameArrayRow
+    call removeGameArrayRow			# remove first found completed row
     inc completedLines
-    jmp .clearLines
+    jmp .clearLines					# loop
 .generateNewPiece:
     call getRandomNumberBetween1And7
     movb %al, currentPieceID(%rip)   # prep new piece
@@ -172,7 +171,7 @@ gameLoop:
     movsbq currentY(%rip), %rsi
     call isValidPosition
     test %rax, %rax
-    jz .setGameStateLost
+    jz .setGameStateLost			# if can't place new piece -> gameState lose
     call printGameplay
     call drawUI
 
@@ -194,7 +193,7 @@ gameLoop:
     ret
 
 .renderGameStateWin:
-    mov timeInSeconds(%rip), %rdi
+	mov timeInSeconds(%rip), %rdi
     call addScoreToLeaderboard
     call drawYouWin
     ret
@@ -208,6 +207,6 @@ gameLoop:
     movb $3, currentX(%rip)
     movb $0, currentY(%rip)
     movb $0, currentRotation(%rip)
-    mov $0, hasAddedNewScoreThisSession(%rip)
+	mov $0, hasAddedNewScoreThisSession(%rip)
 
     jmp postScoreLoadGameInit

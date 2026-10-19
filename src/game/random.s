@@ -1,4 +1,4 @@
-# No idea how the C code works btw, some Xorshift64 algorithm
+# Xorshift64 algorithm
 # Pseudo C code for the random number generator:
 # uint64_t seed = 88172645463325252ULL;
 # seed ^= seed << 13;
