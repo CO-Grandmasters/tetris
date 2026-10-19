@@ -25,6 +25,7 @@ handleMovement:
   jmp .handleMovementAfterCheck
 .handleMovementDown:
   call tryMoveDown
+  movb $60, ticksUntilMoveDown
 .handleMovementAfterCheck:
   cmp $0, %rax
   je .handleMovementExit
