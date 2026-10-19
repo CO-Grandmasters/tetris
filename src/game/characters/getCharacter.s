@@ -1,3 +1,4 @@
+.section .game.data
 uppercaseBitmapTable:
     .quad CHARA, CHARB, CHARC, CHARD, CHARE, CHARF, CHARG
     .quad CHARH, CHARI, CHARJ, CHARK, CHARL, CHARM, CHARN

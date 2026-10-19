@@ -5,12 +5,15 @@ include local.mk
 
 PREFIX=/usr
 COMPPATH=$(PREFIX)/bin
-CC = $(COMPPATH)/$(TARGET)gcc
 CXX = $(COMPPATH)/$(TARGET)g++
-AS = $(COMPPATH)/$(TARGET)as
 AR = $(COMPPATH)/$(TARGET)ar
 NM = $(COMPPATH)/$(TARGET)nm
+CC = $(COMPPATH)/$(TARGET)gcc
+AS = $(COMPPATH)/$(TARGET)as
 LD = $(COMPPATH)/$(TARGET)ld
+#CC = x86_64-elf-gcc
+#AS = x86_64-elf-as
+#LD = x86_64-elf-ld
 OBJDUMP = $(COMPPATH)/$(TARGET)objdump
 OBJCOPY = $(COMPPATH)/$(TARGET)objcopy
 RANLIB = $(COMPPATH)/$(TARGET)ranlib
@@ -30,8 +33,8 @@ out/kernel: out/kernel.o src/kernel/link_kernel.ld | HD_img
 out/boot.o: src/bootloader/*.s | out
 	$(AS) src/bootloader/*.s -o $@
 
-out/kernel.o: src/kernel/*.s src/game/*.s src/game/cubes/*.s src/game/pieces/*.s src/game/characters/*.s | out
-	$(AS) src/kernel/*.s src/game/*.s src/game/cubes/*.s src/game/pieces/*.s src/game/characters/*.s -o $@
+out/kernel.o: src/kernel/*.s src/game/*.s src/game/characters/*.s src/game/cubes/*.s src/game/pieces/*.s src/game/numbers/*.s | out
+	$(AS) src/kernel/*.s src/game/*.s src/game/characters/*.s src/game/cubes/*.s src/game/pieces/*.s src/game/numbers/*.s -o $@
 
 HD_img:
 	dd if=/dev/zero of=$@ count=2048
@@ -53,4 +56,3 @@ clean:
 	rm -rf out
 
 .PHONY: clean all kvm qemu 
-

@@ -27,6 +27,9 @@ along with gamelib-x64. If not, see <http://www.gnu.org/licenses/>.
 .section .game.data
 # (screen width - 8*squareSize) / 2
 
+timeInSeconds: .quad 0
+completedLines: .quad 0
+maxLines: .quad 40
 printingOffset: .quad 112
 tickCounter: .quad 0
 squareSize: .quad 12
@@ -96,6 +99,7 @@ gameLoop:
 	jl .postDraw
 
     movb $0, tickCounter
+    inc timeInSeconds
     
     call tryMoveDown
     cmp $0, %rax
