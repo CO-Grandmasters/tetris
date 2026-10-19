@@ -26,7 +26,7 @@ along with gamelib-x64. If not, see <http://www.gnu.org/licenses/>.
 
 .section .game.data
 # -1 - lost, 0 - playing, 1 - won
-gameState: .quad -1
+gameState: .quad 0
 timeInSeconds: .quad 0
 completedLines: .quad 0
 maxLines: .quad 40
@@ -138,12 +138,19 @@ gameLoop:
 
 .putPieceInGameArray:
     call placePieceInGameArray      # put piece in gameArray
-    test %rax, %rax
-    jnz .loadNextPiece
+    cmp $0, %rax
+    jne .clearLines
     movq $-1, gameState(%rip)
     jmp .renderGameState
-
-.loadNextPiece:
+.clearLines:
+    call findCompletedRow
+    cmp $-1, %rax
+    je .generateNewPiece
+    mov %rax, %rdi
+    call removeGameArrayRow
+    inc completedLines
+    jmp .clearLines
+.generateNewPiece:
     call getRandomNumberBetween1And7
     movb %al, currentPieceID(%rip)   # prep new piece
     movb $0, currentRotation(%rip)
