@@ -32,6 +32,7 @@ completedLines: .quad 0
 maxLines: .quad 40
 printingOffset: .quad 112
 tickCounter: .quad 0
+ticksUntilMoveDown: .quad 60
 squareSize: .quad 12
 arraySize: .quad 180
 currentPieceID: .byte 1
@@ -53,26 +54,26 @@ gameInit:
 	setPallette $1, $0xb4b4b4 # Cube 0 (background cube)
 	setPallette $2, $0x464646
 
-	setPallette $3, $0x99d9ea # Cube 1 (I-piece)
-	setPallette $4, $0x00b7ef
+	setPallette $3, $0x00f0f0 # Cube 1 (I-piece)
+	setPallette $4, $0x009e9e
 
-	setPallette $5, $0x4d6df3 # Cube 2 (J-piece)
-	setPallette $6, $0x2f3699
+	setPallette $5, $0x0000f0 # Cube 2 (J-piece)
+	setPallette $6, $0x00009e
 
-	setPallette $7, $0xe5aa7a # Cube 3 (L-piece)
-	setPallette $8, $0xff7e00
+	setPallette $7, $0xf0a000 # Cube 3 (L-piece)
+	setPallette $8, $0x9e6500
 
-	setPallette $9, $0xfff200 # Cube 4 (O-piece)
-	setPallette $10, $0xffc20e
+	setPallette $9, $0xf0f000 # Cube 4 (O-piece)
+	setPallette $10, $0x9e9e00
 
-	setPallette $11, $0xd3f9bc # Cube 5 (S-piece)
-	setPallette $12, $0x22b14c
+	setPallette $11, $0x00f000 # Cube 5 (S-piece)
+	setPallette $12, $0x009e00
 
-	setPallette $13, $0xffa3b1 # Cube 6 (Z-piece)
-	setPallette $14, $0xed1c24
+	setPallette $13, $0xf00000 # Cube 6 (Z-piece)
+	setPallette $14, $0x9e0000
 
-	setPallette $15, $0xb5a5d5 # Cube 7 (T-piece)
-	setPallette $16, $0x6f3198
+	setPallette $15, $0xa000f0 # Cube 7 (T-piece)
+	setPallette $16, $0x630096
 
     setPallette $17, $0x000000 # Black for text
 
@@ -95,39 +96,45 @@ gameInit:
 	ret
 
 gameLoop:
-	cmpb $60, tickCounter
-	jl .postDraw
-
-    movb $0, tickCounter
-    inc timeInSeconds
-    
+    cmpb $60, tickCounter
+    jge .incrementSeconds
+.postIncrementSeconds:
+    call drawUI
+	cmpb $0, ticksUntilMoveDown
+	jg .postDraw
+.handleMoveDown:
+    movb $60, ticksUntilMoveDown
     call tryMoveDown
     cmp $0, %rax
     je .putPieceInGameArray
-
     call printGameplay
-    call drawUI
-
 .postDraw:
     xor %rax, %rax
     readKeyCode
     mov %rax, %rdi
     call handleMovement
 
-	inc tickCounter
+    inc tickCounter
+	dec ticksUntilMoveDown
 	ret
+
+.incrementSeconds:
+    inc timeInSeconds
+    movb $0, tickCounter
+    jmp .postIncrementSeconds
 
 .putPieceInGameArray:
     call placePieceInGameArray      # put piece in gameArray
     test %rax, %rax
     jz .postDraw
 
-    movb $1, currentPieceID(%rip)   # prep new piece
+    incb currentPieceID(%rip)   # prep new piece
     movb $0, currentRotation(%rip)
     movb $3, currentX(%rip)
     movb $0, currentY(%rip)
     call loadPiece
     call printGameplay
+    call drawUI
 
     jmp .postDraw                   # go back to gameLoop
 
